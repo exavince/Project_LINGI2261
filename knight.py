@@ -11,10 +11,24 @@ from search import *
 class Knight(Problem):
 
     def successor(self, state):
-        pass
-
+        x = state.initX
+        y = state.initY
+        print(state)
+        if x-1 >= 0:
+            pass
+        if x+1 < state.nCols:
+            pass
+        if y-1 >= 0:
+            pass
+        if y+1 < state.nRows: 
+            pass
     def goal_test(self, state):
-        pass
+        for i in range(state.nRows):
+            for j in range(state.nCols):
+                if state.grid[i][j] != "\u265E":
+                    return True
+        return False
+                
 
 
 ###############
@@ -29,6 +43,8 @@ class State:
         for i in range(self.nRows):
             self.grid.append([" "] * self.nCols)
         self.grid[init_pos[0]][init_pos[1]] = "♘"
+        self.initX = init_pos[0]
+        self.initY = init_pos[1]
 
     def __str__(self):
         nsharp = (2 * self.nCols) + (self.nCols // 5)
@@ -46,6 +62,13 @@ class State:
         s += "#" * nsharp
         return s
 
+###################
+# Other functions #
+###################
+def checkPosition (state, x, y):
+    if state.grid[x][y] == "\u265E":
+        return True
+    return False
 
 ##############################
 # Launch the search in local #
@@ -85,24 +108,24 @@ for instance in instances:
 # Launch the search for INGInious  #
 ####################################
 #Use this block to test your code on INGInious
-shape = (int(sys.argv[1]),int(sys.argv[2]))
-init_pos = (int(sys.argv[3]),int(sys.argv[4]))
-init_state = State(shape, init_pos)
+#shape = (int(sys.argv[1]),int(sys.argv[2]))
+#init_pos = (int(sys.argv[3]),int(sys.argv[4]))
+#init_state = State(shape, init_pos)
 
-problem = Knight(init_state)
+#problem = Knight(init_state)
 
 # example of bfs graph search
-startTime = time.perf_counter()
-node, nbExploredNodes = breadth_first_graph_search(problem)
-endTime = time.perf_counter()
+#startTime = time.perf_counter()
+#node, nbExploredNodes = breadth_first_graph_search(problem)
+#endTime = time.perf_counter()
 
 # example of print
-path = node.path()
-path.reverse()
+#path = node.path()
+#path.reverse()
 
-print('Number of moves: ' + str(node.depth))
-for n in path:
-    print(n.state)  # assuming that the __str__ function of state outputs the correct format
-    print()
-print("nb nodes explored = ",nbExploredNodes)
-print("time : " + str(endTime - startTime))
+#print('Number of moves: ' + str(node.depth))
+#for n in path:
+ #   print(n.state)  # assuming that the __str__ function of state outputs the correct format
+  #  print()
+#print("nb nodes explored = ",nbExploredNodes)
+#print("time : " + str(endTime - startTime))
