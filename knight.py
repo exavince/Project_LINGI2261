@@ -13,56 +13,51 @@ class Knight(Problem):
 
     def successor(self, state):
         row, col = searchPosition(state)
-        list_state = []
         if row-1 >= 0:
-            if col-2 >= 0 and not checkPosition(state, row-1, col-2):
+            if col-2 >= 0 and checkPosition(state, row-1, col-2):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row-1][col-2] == "♘"
-                list_state.append(newState)
-            if col+2 < state.nCols and not checkPosition(state, row-1, col+2):
+                newState.grid[row-1][col-2] = "♘"
+                yield("", newState)
+            if col+2 < state.nCols and checkPosition(state, row-1, col+2):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row-1][col+2] == "♘"
-                list_state.append(newState)
+                newState.grid[row-1][col+2] = "♘"
+                yield("",newState)
         if row+1 < state.nRows:
-            if col-2 >= 0 and not checkPosition(state, row+1, col-2):
+            if col-2 >= 0 and checkPosition(state, row+1, col-2):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row+1][col-2] == "♘"
-                list_state.append(newState)
-            if col+2 < state.nCols and not checkPosition(state, row+1, col+2):
+                newState.grid[row+1][col-2] = "♘"
+                yield("",newState)
+            if col+2 < state.nCols and checkPosition(state, row+1, col+2):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row+1][col+2] == "♘"
-                list_state.append(newState)
+                newState.grid[row+1][col+2] = "♘"
+                yield("",newState)
         if col-1 >= 0:
-            if row-2 >= 0 and not checkPosition(state, row-2, col-1):
+            if row-2 >= 0 and checkPosition(state, row-2, col-1):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row-2][col-1] == "♘"
-                list_state.append(newState)
-            if row+2 < state.nRows and not checkPosition(state, row+2, col-1):
+                newState.grid[row-2][col-1] = "♘"
+                yield("",newState)
+            if row+2 < state.nRows and checkPosition(state, row+2, col-1):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row+2][col-1] == "♘"
-                list_state.append(newState)
+                newState.grid[row+2][col-1] = "♘"
+                yield("",newState)
         if col+1 < state.nCols: 
-            if row-2 >= 0 and not checkPosition(state, row-2, col+1):
+            if row-2 >= 0 and checkPosition(state, row-2, col+1):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row-2][col+1] == "♘"
-                list_state.append(newState)
-            if row+2 < state.nRows and not checkPosition(state, row+2, col+1):
+                newState.grid[row-2][col+1] = "♘"
+                yield("",newState)
+            if row+2 < state.nRows and checkPosition(state, row+2, col+1):
                 newState = copy.deepcopy(state)
                 newState.grid[row][col] = "\u265E"
-                newState.grid[row+2][col+1] == "♘"
-                list_state.append(newState)
+                newState.grid[row+2][col+1] = "♘"
+                yield("",newState)
       
-            
-        for s in list_state:
-            yield("", s)
-            
             
     def goal_test(self, state):
         count = 0;
@@ -107,7 +102,7 @@ class State:
 # Other functions #
 ###################
 def checkPosition(state, x, y):
-    if state.grid[x][y] == "\u265E":
+    if state.grid[x][y] == " ":
         return True
     return False
 
@@ -138,7 +133,7 @@ for instance in instances:
 
     # example of bfs graph search
     startTime = time.perf_counter()
-    node, nbExploredNodes = breadth_first_tree_search(problem)
+    node, nbExploredNodes = depth_first_tree_search(problem)
     endTime = time.perf_counter()
 
     # example of print
