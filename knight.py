@@ -2,6 +2,7 @@
 '''NAMES OF THE AUTHOR(S): Gael Aglin <gael.aglin@uclouvain.be>'''
 import time
 import sys
+import copy
 from search import *
 
 
@@ -11,23 +12,65 @@ from search import *
 class Knight(Problem):
 
     def successor(self, state):
-        x = state.initX
-        y = state.initY
-        print(state)
-        if x-1 >= 0:
-            pass
-        if x+1 < state.nCols:
-            pass
-        if y-1 >= 0:
-            pass
-        if y+1 < state.nRows: 
-            pass
+        row, col = searchPosition(state)
+        list_state = []
+        if row-1 >= 0:
+            if col-2 >= 0 and not checkPosition(state, row-1, col-2):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row-1][col-2] == "♘"
+                list_state.append(newState)
+            if col+2 < state.nCols and not checkPosition(state, row-1, col+2):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row-1][col+2] == "♘"
+                list_state.append(newState)
+        if row+1 < state.nRows:
+            if col-2 >= 0 and not checkPosition(state, row+1, col-2):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row+1][col-2] == "♘"
+                list_state.append(newState)
+            if col+2 < state.nCols and not checkPosition(state, row+1, col+2):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row+1][col+2] == "♘"
+                list_state.append(newState)
+        if col-1 >= 0:
+            if row-2 >= 0 and not checkPosition(state, row-2, col-1):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row-2][col-1] == "♘"
+                list_state.append(newState)
+            if row+2 < state.nRows and not checkPosition(state, row+2, col-1):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row+2][col-1] == "♘"
+                list_state.append(newState)
+        if col+1 < state.nCols: 
+            if row-2 >= 0 and not checkPosition(state, row-2, col+1):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row-2][col+1] == "♘"
+                list_state.append(newState)
+            if row+2 < state.nRows and not checkPosition(state, row+2, col+1):
+                newState = copy.deepcopy(state)
+                newState.grid[row][col] = "\u265E"
+                newState.grid[row+2][col+1] == "♘"
+                list_state.append(newState)
+      
+            
+        for s in list_state:
+            yield("", s)
+            
+            
     def goal_test(self, state):
+        count = 0;
         for i in range(state.nRows):
             for j in range(state.nCols):
                 if state.grid[i][j] != "\u265E":
-                    return True
-        return False
+                    count += 1
+        return count == 1
                 
 
 
@@ -43,8 +86,6 @@ class State:
         for i in range(self.nRows):
             self.grid.append([" "] * self.nCols)
         self.grid[init_pos[0]][init_pos[1]] = "♘"
-        self.initX = init_pos[0]
-        self.initY = init_pos[1]
 
     def __str__(self):
         nsharp = (2 * self.nCols) + (self.nCols // 5)
@@ -65,10 +106,18 @@ class State:
 ###################
 # Other functions #
 ###################
-def checkPosition (state, x, y):
+def checkPosition(state, x, y):
     if state.grid[x][y] == "\u265E":
         return True
     return False
+
+    
+def searchPosition(state):
+    for i in range(state.nRows):
+        for j in range(state.nCols):
+            if state.grid[i][j] == "♘":
+                return i, j
+    return False, False
 
 ##############################
 # Launch the search in local #
@@ -84,21 +133,22 @@ for instance in instances:
     init_pos = (int(elts[2]), int(elts[3]))
     init_state = State(shape, init_pos)
 
+
     problem = Knight(init_state)
 
     # example of bfs graph search
     startTime = time.perf_counter()
-    node, nbExploredNodes = breadth_first_graph_search(problem)
+    node, nbExploredNodes = breadth_first_tree_search(problem)
     endTime = time.perf_counter()
 
     # example of print
     path = node.path()
+    for n in path:
+        print(n)
     path.reverse()
 
     print('Number of moves: ' + str(node.depth))
-    for n in path:
-        print(n.state)  # assuming that the __str__ function of state outputs the correct format
-        print()
+    
     print("nb nodes explored = ",nbExploredNodes)
     print("time : " + str(endTime - startTime))
 
