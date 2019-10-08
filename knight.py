@@ -4,93 +4,47 @@ import time
 import sys
 import copy
 from search import *
+import cProfile
 
+moves = [(-1, -2), (-1, +2), (1, -2), (1, +2), (-2, -1), (-2, +1), (2, -1), (2, +1)]  # initialized only once
 
 #################
 # Problem class #
 #################
 class Knight(Problem):
-
     def successor(self, state):
-        successor_TopLeft = []
-        successor_TopRight = []
-        successor_DownRight = []
-        successor_DownLeft = []
-        row, col = state.position
-        if row - 1 >= 0:
-            if col - 2 >= 0 and checkPosition(state, row - 1, col - 2):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row - 1][col - 2] = "♘"
-                newState.position = (row - 1, col - 2)
+        col, row = state.position
+        successors = []
+        for move in moves:
+            newCol, newRow = col + move[0], row + move[1]
+            if validMove(self, state, newCol, newRow):
+                newState = State((state.nCols, state.nRows), state.position)
+                newState.grid = [list(x) for x in state.grid]
                 newState.counter = state.counter - 1
-                successor_TopLeft.append(newState)
-            if col + 2 < state.nCols and checkPosition(state, row - 1, col + 2):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row - 1][col + 2] = "♘"
-                newState.position = (row - 1, col + 2)
-                newState.counter = state.counter - 1
-                successor_TopRight.append(newState) 
-        if row + 1 < state.nRows:
-            if col - 2 >= 0 and checkPosition(state, row + 1, col - 2):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row + 1][col - 2] = "♘"
-                newState.position = (row + 1, col - 2)
-                newState.counter = state.counter - 1
-                successor_DownLeft.append(newState) 
-            if col + 2 < state.nCols and checkPosition(state, row + 1, col + 2):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row + 1][col + 2] = "♘"
-                newState.position = (row + 1, col + 2)
-                newState.counter = state.counter - 1
-                successor_DownRight.append(newState)
-        if col - 1 >= 0:
-            if row - 2 >= 0 and checkPosition(state, row - 2, col - 1):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row - 2][col - 1] = "♘"
-                newState.position = (row - 2, col - 1)
-                newState.counter = state.counter - 1
-                successor_TopLeft.append(newState) 
-            if row + 2 < state.nRows and checkPosition(state, row + 2, col - 1):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row + 2][col - 1] = "♘"
-                newState.position = (row + 2, col - 1)
-                newState.counter = state.counter - 1
-                successor_DownLeft.append(newState) 
-        if col + 1 < state.nCols:
-            if row - 2 >= 0 and checkPosition(state, row - 2, col + 1):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row - 2][col + 1] = "♘"
-                newState.position = (row - 2, col + 1)
-                newState.counter = state.counter - 1
-                successor_TopRight.append(newState) 
-            if row + 2 < state.nRows and checkPosition(state, row + 2, col + 1):
-                newState = copy.deepcopy(state)
-                newState.grid[row][col] = "\u265E"
-                newState.grid[row + 2][col + 1] = "♘"
-                newState.position = (row + 2, col + 1)
-                newState.counter = state.counter - 1
-                successor_DownRight.append(newState) 
-	
-	
-        for s in successor_TopLeft:
-            yield("", s)
-        for s in successor_DownLeft:
-            yield("", s)
-        for s in successor_DownRight:
-            yield("", s)      
-        for s in successor_TopRight:
-            yield("", s)     
+                newState.grid[col][row] = "\u265E"
+                newState.grid[newCol][newRow] = "♘"
+                newState.position = (newCol, newRow)
+                newState.numberSuccessors = numberSuccessors(self, state, newCol, newRow)
+                successors.append(("", newState))
+        return sorted(successors, key=lambda x: x[1].numberSuccessors, reverse=True)
+        return successors
 
     def goal_test(self, state):
         return state.counter == 1
 
+
+###################
+# Other functions #
+###################
+def validMove(self, state, col, row):
+    return 0 <= col < state.nCols and 0 <= row < state.nRows and state.grid[col][row] == " "
+
+def numberSuccessors(self, state, col, row):
+    counter = 0
+    for move in moves:
+        newCol, newRow = col + move[0], row + move[1]
+        if validMove(self, state, newCol, newRow): counter+= 1
+    return counter
 
 ###############
 # State class #
@@ -100,9 +54,10 @@ class State:
     def __init__(self, shape, init_pos):
         self.nCols = shape[0]
         self.nRows = shape[1]
+        self.grid = []
         self.position = init_pos
         self.counter = self.nCols * self.nRows
-        self.grid = []
+        self.numberSuccessors = 0
         for i in range(self.nRows):
             self.grid.append([" "] * self.nCols)
         self.grid[init_pos[0]][init_pos[1]] = "♘"
@@ -124,74 +79,67 @@ class State:
         return s
 
 
-###################
-# Other functions #
-###################
-def checkPosition(state, x, y):
-    if state.grid[x][y] == " ":
-        return True
-    return False
+inginious = False
 
+if not inginious:
 
+    ##############################
+    # Launch the search in local #
+    ##############################
+    # Use this block to test your code in local
+    # Comment it and uncomment the next one if you want to submit your code on INGInious
 
-##############################
-# Launch the search in local #
-##############################
-# Use this block to test your code in local
-# Comment it and uncomment the next one if you want to submit your code on INGInious
-"""
-with open('instancesFile') as f:
-    instances = f.read().splitlines()
+    with open('instancesFile') as f:
+        instances = f.read().splitlines()
 
-    for instance in instances:
-        elts = instance.split(" ")
-        shape = (int(elts[0]), int(elts[1]))
-        init_pos = (int(elts[2]), int(elts[3]))
-        init_state = State(shape, init_pos)
+        for instance in instances:
+            elts = instance.split(" ")
+            shape = (int(elts[0]), int(elts[1]))
+            init_pos = (int(elts[2]), int(elts[3]))
+            init_state = State(shape, init_pos)
 
-        problem = Knight(init_state)
+            problem = Knight(init_state)
 
-        # example of bfs graph search
-        startTime = time.perf_counter()
-        node, nbExploredNodes = depth_first_tree_search(problem)
-        endTime = time.perf_counter()
+            # example of bfs graph search
+            startTime = time.perf_counter()
+            node, nbExploredNodes = depth_first_graph_search(problem)
+            endTime = time.perf_counter()
 
-        print('Number of moves: ' + str(node.depth))
-        
-        path = node.path()
-        path.reverse()
-        for n in path:
-            print(n.state)  # assuming that the __str__ function of state outputs the correct format
-            print()
+            print('Number of moves: ' + str(node.depth))
 
-        print("nb nodes explored = ", nbExploredNodes)
-        print("time : " + str(endTime - startTime))
-"""
-####################################
-# Launch the search for INGInious  #
-####################################
-# Use this block to test your code on INGInious
+            path = node.path()
+            path.reverse()
+            for n in path:
+                print(n.state)  # assuming that the __str__ function of state outputs the correct format
+                print()
 
+            print("nb nodes explored = ", nbExploredNodes)
+            print("time : " + str(endTime - startTime))
 
-shape = (int(sys.argv[1]),int(sys.argv[2]))
-init_pos = (int(sys.argv[3]),int(sys.argv[4]))
-init_state = State(shape, init_pos)
+else:
 
-problem = Knight(init_state)
+    ####################################
+    # Launch the search for INGInious  #
+    ####################################
+    # Use this block to test your code on INGInious
 
-#        #example of bfs
-startTime = time.perf_counter()
-node, nbExploredNodes = depth_first_graph_search(problem)
-endTime = time.perf_counter()
+    shape = (int(sys.argv[1]), int(sys.argv[2]))
+    init_pos = (int(sys.argv[3]), int(sys.argv[4]))
+    init_state = State(shape, init_pos)
 
-path = node.path()
-path.reverse()
+    problem = Knight(init_state)
 
-print('Number of moves: ' + str(node.depth))
-for n in path:
-    print(n.state)  # assuming that the __str__ function of state outputs the correct format
-    print()
-print("nb nodes explored = ",nbExploredNodes)
-print("time : " + str(endTime - startTime))
+    #        #example of bfs
+    startTime = time.perf_counter()
+    node, nbExploredNodes = depth_first_graph_search(problem)
+    endTime = time.perf_counter()
 
+    path = node.path()
+    path.reverse()
 
+    print('Number of moves: ' + str(node.depth))
+    for n in path:
+        print(n.state)  # assuming that the __str__ function of state outputs the correct format
+        print()
+    print("nb nodes explored = ", nbExploredNodes)
+    print("time : " + str(endTime - startTime))
