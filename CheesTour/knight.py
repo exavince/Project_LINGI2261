@@ -26,7 +26,6 @@ class Knight(Problem):
                 newState.position = (newCol, newRow)
                 newState.numberSuccessors = numberSuccessors(self, state, newCol, newRow)
                 successors.append(("", newState))
-        return sorted(successors, key=lambda x: x[1].numberSuccessors, reverse=True)
         return successors
 
     def goal_test(self, state):
@@ -91,7 +90,7 @@ if not inginious:
 
     with open('instancesFile') as f:
         instances = f.read().splitlines()
-
+        count = 0
         for instance in instances:
             elts = instance.split(" ")
             shape = (int(elts[0]), int(elts[1]))
@@ -99,20 +98,15 @@ if not inginious:
             init_state = State(shape, init_pos)
 
             problem = Knight(init_state)
-
+            print('Instance: ' + str(count))
             # example of bfs graph search
+
             startTime = time.perf_counter()
             node, nbExploredNodes = depth_first_graph_search(problem)
             endTime = time.perf_counter()
 
+            count = count+1
             print('Number of moves: ' + str(node.depth))
-
-            path = node.path()
-            path.reverse()
-            for n in path:
-                print(n.state)  # assuming that the __str__ function of state outputs the correct format
-                print()
-
             print("nb nodes explored = ", nbExploredNodes)
             print("time : " + str(endTime - startTime))
 
@@ -131,7 +125,7 @@ else:
 
     #        #example of bfs
     startTime = time.perf_counter()
-    node, nbExploredNodes = depth_first_graph_search(problem)
+    node, nbExploredNodes = depth_first_tree_search(problem)
     endTime = time.perf_counter()
 
     path = node.path()
